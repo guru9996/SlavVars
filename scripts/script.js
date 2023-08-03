@@ -2,7 +2,7 @@ let canvas = document.getElementById('canvas');
 let canvasContext = canvas.getContext('2d');
 
 
-//подгрузка хуйни
+//подгрузка фото
 
 let background = new Image();
 background.src = "./images/background.png";
@@ -14,28 +14,28 @@ background.onload = function() {
 }
 
 let enemyTank1 = new Image();
-enemyTank1.src = "images/enemyTank1.png";
+enemyTank1.src = "./images/enemyTank1.png";
 enemyTank1.onload = function() {
     canvasContext.drawImage(enemyTank1, rightEnemyTank.x, rightEnemyTank.y);
 }
 
 let enemyTank2 = new Image();
-enemyTank2.src = "images/enemyTank2.png";
+enemyTank2.src = "./images/enemyTank2.png";
 enemyTank2.onload = function() {
     canvasContext.drawImage(enemyTank2, leftEnemyTank.x, leftEnemyTank.y);
 }
 
 let tank = new Image();
-tank.src = "images/tank.png";
+tank.src = "./images/tank.png";
 tank.onload = function() {
-    canvasContext.drawImage(tank, 870, 850);
+    canvasContext.drawImage(tank, frieldlyTank.x, frieldlyTank.y);
 }
 
 let lostScr = new Image()
-lostScr.src = "images/lostScreen.png"
+lostScr.src = "./images/lostScreen.png"
 
-let pulaI = new Image()
-pulaI.src = "images/pula.png"
+let projectileModel = new Image()
+projectileModel.src = "./images/pula.png"
 
 //
 
@@ -100,14 +100,14 @@ let word1 = {
     y: 270,
 }
 
-let pula = {
+let projectile = {
     height: 57,
     width: 57,
     x: 896,
     y: 790,
     startx: 896,
     starty: 790,
-    model: pulaI,
+    model: projectileModel,
     dx: 0,
     dy: 0,
     disX: 0,
@@ -125,16 +125,10 @@ let restart ={
 
 //
 
-//функции работы поеботы хуёты игроты
+//функции
 
 function initEventsListeners() {
     window.addEventListener("click", clickmouse);
-}
-
-function clickmouse(event) {
-    if (game.isGame === true) {
-        draw(pula)
-    }
 }
 
 function removeObject(obj) {
@@ -143,26 +137,26 @@ function removeObject(obj) {
 }
 
 function niceShotInLeftTank(obj) {
-    let shotLeft = pula.x < obj.x;
-    let shotRight = pula.x + pula.width > obj.x + obj.width;
-    let shotTop = pula.y + pula.height < obj.y;
-    let shotBottom = pula.y < obj.y + obj.height;
+    let shotLeft = projectile.x < obj.x;
+    let shotRight = projectile.x + projectile.width > obj.x + obj.width;
+    let shotTop = projectile.y + projectile.height < obj.y;
+    let shotBottom = projectile.y < obj.y + obj.height;
     obj.isDead = (shotLeft && shotRight && shotTop && shotBottom);
 }
 
 function niceShotInRightTank(obj) {
-    let shotLeft1 = pula.x < obj.x + obj.width;
-    let shotLeft = pula.x > obj.x;
-    let shotTop = pula.y < obj.y;
+    let shotLeft1 = projectile.x < obj.x + obj.width;
+    let shotLeft = projectile.x > obj.x;
+    let shotTop = projectile.y < obj.y;
     if(shotLeft && shotLeft1 && shotTop){
         obj.isDead = true
     }
 }
 
 function niceShotInLeftTank(obj) {
-    let shotLeft1 = pula.x < obj.x + obj.width;
-    let shotLeft = pula.x > obj.x;
-    let shotTop = pula.y < obj.y;
+    let shotLeft1 = projectile.x < obj.x + obj.width;
+    let shotLeft = projectile.x > obj.x;
+    let shotTop = projectile.y < obj.y;
     if(shotLeft && shotLeft1 && shotTop){
         obj.isDead = true
     }
@@ -170,11 +164,11 @@ function niceShotInLeftTank(obj) {
 
 function clickmouse(event) {
     if (game.isGame === true) {
-        pula.disX = event.clientX;
-        pula.disY = event.clientY;
-        if (pula.dx === 0 && pula.dy === 0) {
-            pula.dx = Math.round(((pula.disX - pula.x) / (((Math.abs(pula.disX - pula.x) ** 2) + Math.abs(pula.disY - pula.y) ** 2) ** (1 / 2) / pula.height)));
-            pula.dy = Math.abs(Math.round(((pula.disY - pula.y) / (((Math.abs(pula.disX - pula.x) ** 2) + Math.abs(pula.disY - pula.y) ** 2) ** (1 / 2) / pula.height ))));
+        projectile.disX = event.clientX;
+        projectile.disY = event.clientY;
+        if (projectile.dx === 0 && projectile.dy === 0) {
+            projectile.dx = Math.round(((projectile.disX - projectile.x) / (((Math.abs(projectile.disX - projectile.x) ** 2) + Math.abs(projectile.disY - projectile.y) ** 2) ** (1 / 2) / projectile.height)));
+            projectile.dy = Math.abs(Math.round(((projectile.disY - projectile.y) / (((Math.abs(projectile.disX - projectile.x) ** 2) + Math.abs(projectile.disY - projectile.y) ** 2) ** (1 / 2) / projectile.height ))));
         }
     }
 }
@@ -183,50 +177,50 @@ function draw(obj) {
     canvasContext.drawImage(obj.model, obj.x, obj.y);
 }
 
-function drawFrame() {
-    canvasContext.clearRect(0, 0, 1920, 1080);
-    if (pula.coordX + pula.dx > game.width || pula.coordY + pula.dy > game.height || pula.coordX + pula.dx < 0) {
-        pula.coordX = pula.startx;
-        pula.coordY = pula.starty;
-        pula.dx = 0;
-        pula.dy = 0;
-        draw(pula);
-    }
-    pula.x += pula.dx;
-    pula.y -= pula.dy;
+function update(){
+    projectile.x += projectile.dx;
+    projectile.y -= projectile.dy;
     leftEnemyTank.x -= leftEnemyTank.speed
     rightEnemyTank.x += rightEnemyTank.speed
-    draw(ground)
-    draw(rightEnemyTank)
-    draw(leftEnemyTank)
-    draw(frieldlyTank)
-    draw(pula)
     niceShotInRightTank(rightEnemyTank);
     if (rightEnemyTank.isDead === true) {
         console.log('+')
         game.isGame = false
         removeObject(rightEnemyTank);
     }
-
     niceShotInLeftTank(leftEnemyTank)
     if (leftEnemyTank.isDead === true) {
         console.log('+')
         game.isGame = false
         removeObject(leftEnemyTank);
     }
-
-    requestAnimationFrame(play)
 }
 
+function drawFrame() {
+    canvasContext.clearRect(0, 0, 1920, 1080);
+    draw(ground)
+    draw(rightEnemyTank)
+    draw(leftEnemyTank)
+    draw(frieldlyTank)
+    draw(projectile)
+    isTankIsAbordBorder()
+}
 
-function play(){
-    if(leftEnemyTank.x > 20 && game.isGame === true){
-        drawFrame()
-    } else {
-        location.reload();
+function isTankIsAbordBorder(){
+    if(leftEnemyTank.x < 20){
+        game.isGame = false
     }
 }
 
+function play(){
+    if(game.isGame === true){
+        drawFrame()
+        update()
+    } else {
+        location.reload();
+    }
+    requestAnimationFrame(play)
+}
 
 //
 
