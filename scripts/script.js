@@ -194,6 +194,7 @@ function update(){
         game.isGame = false
         removeObject(leftEnemyTank);
     }
+    isTankIsAbordBorder()
 }
 
 function drawFrame() {
@@ -203,7 +204,6 @@ function drawFrame() {
     draw(leftEnemyTank)
     draw(frieldlyTank)
     draw(projectile)
-    isTankIsAbordBorder()
 }
 
 function isTankIsAbordBorder(){
