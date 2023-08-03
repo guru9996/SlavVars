@@ -136,24 +136,8 @@ function removeObject(obj) {
     obj.isDead = false;
 }
 
-function niceShotInLeftTank(obj) {
-    let shotLeft = projectile.x < obj.x;
-    let shotRight = projectile.x + projectile.width > obj.x + obj.width;
-    let shotTop = projectile.y + projectile.height < obj.y;
-    let shotBottom = projectile.y < obj.y + obj.height;
-    obj.isDead = (shotLeft && shotRight && shotTop && shotBottom);
-}
 
-function niceShotInRightTank(obj) {
-    let shotLeft1 = projectile.x < obj.x + obj.width;
-    let shotLeft = projectile.x > obj.x;
-    let shotTop = projectile.y < obj.y;
-    if(shotLeft && shotLeft1 && shotTop){
-        obj.isDead = true
-    }
-}
-
-function niceShotInLeftTank(obj) {
+function niceShot(obj) {
     let shotLeft1 = projectile.x < obj.x + obj.width;
     let shotLeft = projectile.x > obj.x;
     let shotTop = projectile.y < obj.y;
@@ -182,13 +166,13 @@ function update(){
     projectile.y -= projectile.dy;
     leftEnemyTank.x -= leftEnemyTank.speed
     rightEnemyTank.x += rightEnemyTank.speed
-    niceShotInRightTank(rightEnemyTank);
+    niceShot(rightEnemyTank);
     if (rightEnemyTank.isDead === true) {
         console.log('+')
         game.isGame = false
         removeObject(rightEnemyTank);
     }
-    niceShotInLeftTank(leftEnemyTank)
+    niceShot(leftEnemyTank)
     if (leftEnemyTank.isDead === true) {
         console.log('+')
         game.isGame = false
@@ -198,7 +182,7 @@ function update(){
 }
 
 function drawFrame() {
-    canvasContext.clearRect(0, 0, 1920, 1080);
+    canvasContext.clearRect(0, 0, ground.width, ground.height);
     draw(ground)
     draw(rightEnemyTank)
     draw(leftEnemyTank)
