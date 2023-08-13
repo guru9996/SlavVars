@@ -1,7 +1,6 @@
 let canvas = document.getElementById('canvas');
 let canvasContext = canvas.getContext('2d');
 
-
 //подгрузка фото
 
 let background = new Image();
@@ -34,13 +33,21 @@ tank.onload = function() {
 let lostScr = new Image()
 lostScr.src = "./images/lostScreen.png"
 
+let winScr = new Image()
+winScr.src = "./images/winScreen.png"
+
 let projectileModel = new Image()
 projectileModel.src = "./images/pula.png"
 
+let restButt = new Image()
+restButt.src = "./images/restartButton.png"
 //
 
 //объекты и массивы
-let content = ["слово 1", "слово 2"]
+let content = ["правильное слово", "неправильное слово", "правильное слово", "неправильное слово", "правильное слово", "неправильное слово", "правильное слово", "неправильное слово", "правильное слово", "неправильное слово", "правильное слово", "неправильное слово"]
+
+let i = 0;
+i = getRandomInt(content.length - 1)
 
 let ground = {
     width: 1920,
@@ -57,15 +64,23 @@ let lostScreen = {
     y: 0,
     model: lostScr,
 }
+let winScreen = {
+    width: 1920,
+    height: 1080,
+    x: 0,
+    y: 0,
+    model: winScr,
+}
 
 let rightEnemyTank = {
     width: 149,
     startx: 270,
     x: 270,
-    y: 265, 
-    speed: 13.55,//13.55
+    y: 145, 
+    speed: 6.235,//13.55
     model: enemyTank1,
     isDead: false,
+    isRightTank: false,
 }
 
 let leftEnemyTank = {
@@ -73,9 +88,10 @@ let leftEnemyTank = {
     startx: 1400,
     x: 1400,
     y: 265, 
-    speed: 13,//13
+    speed: 6,//13
     model: enemyTank2,
     isDead: false,
+    isRightTank: false,
 }
 
 let frieldlyTank = {
@@ -89,15 +105,29 @@ let game = {
     width: 1920,
     height: 1080,
     isGame: true,
+    isPlayerWon: false
 }
 
-let word1 = {
-    value: content[0],
+let wrongWord = {
     color: "gray", 
     width: 250,
     height: 150,
+    startx: 350, 
+    starty: 270,
     x: 350, 
     y: 270,
+    dx: null,
+}
+
+let rightWord = {
+    color: "gray", 
+    width: 250,
+    height: 150,
+    startx: 1350, 
+    starty: 270,
+    x: 1350, 
+    y: 270,
+    dx: null,
 }
 
 let projectile = {
@@ -114,13 +144,12 @@ let projectile = {
     disY: 0,
 }
 
-let restart ={
-    x: 550,
-    x: 500,
-    width: 200,
-    height: 40,
-    text: "RESTART",
-    color: "LightCoral"
+let restartButton = {
+    height: 124,
+    width: 397,
+    x: 796,
+    y: 790,
+    model: restButt,
 }
 
 //
@@ -129,6 +158,15 @@ let restart ={
 
 function initEventsListeners() {
     window.addEventListener("click", clickmouse);
+    window.addEventListener("click", restartGame)
+}
+
+function restartGame(event) {
+    if (!game.isGame){
+        if(event.clientX >= restartButton.x && event.clientX < restartButton.x + restartButton.width && event.clientY >= restartButton.y && event.clientY <= restartButton.y + restartButton.height){
+            location.reload();
+        }
+    }
 }
 
 function removeObject(obj) {
@@ -161,20 +199,38 @@ function draw(obj) {
     canvasContext.drawImage(obj.model, obj.x, obj.y);
 }
 
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
 function update(){
+    if (projectile.y<0) {
+        game.isGame = false
+        drawLose()
+    }
     projectile.x += projectile.dx;
     projectile.y -= projectile.dy;
     leftEnemyTank.x -= leftEnemyTank.speed
     rightEnemyTank.x += rightEnemyTank.speed
+    rightWord.x += rightWord.dx
+    wrongWord.x += wrongWord.dx
     niceShot(rightEnemyTank);
     if (rightEnemyTank.isDead === true) {
-        console.log('+')
+        if(rightEnemyTank.isRightTank === false){
+            game.isPlayerWon = false
+        } else {
+            game.isPlayerWon = true
+        }
         game.isGame = false
         removeObject(rightEnemyTank);
     }
     niceShot(leftEnemyTank)
     if (leftEnemyTank.isDead === true) {
-        console.log('+')
+        if(leftEnemyTank.isRightTank === false){
+            game.isPlayerWon = false
+        } else {
+            game.isPlayerWon = true
+        }
         game.isGame = false
         removeObject(leftEnemyTank);
     }
@@ -188,6 +244,9 @@ function drawFrame() {
     draw(leftEnemyTank)
     draw(frieldlyTank)
     draw(projectile)
+    canvasContext.font = " 32px Arial";// глобальным это сделать нельзя, по этому оно тут
+    canvasContext.fillText(content[i+1], rightWord.x, rightWord.y);
+    canvasContext.fillText(content[i], wrongWord.x, wrongWord.y);
 }
 
 function isTankIsAbordBorder(){
@@ -196,19 +255,60 @@ function isTankIsAbordBorder(){
     }
 }
 
+function drawLose(){
+    draw(lostScreen)
+    draw(restartButton)
+}
+
+function drawWin(){
+    draw(winScreen)
+    draw(restartButton)
+}
+
 function play(){
     if(game.isGame === true){
         drawFrame()
         update()
     } else {
-        location.reload();
+        if(!game.isPlayerWon){
+            drawLose()
+        } else {
+            drawWin()
+        }
     }
     requestAnimationFrame(play)
+}
+
+function contentSetup() {
+    if (i % 2 === 0){
+        rightEnemyTank.isRightTank = true
+        leftEnemyTank.isRightTank = false
+    
+        rightWord.y = 290 //да, это оплохое решение, но есть ставить такой же y, как и у танков, то эта штука отказывакется работать(
+        rightWord.startx = rightEnemyTank.startx
+        wrongWord.startx = leftEnemyTank.startx
+        wrongWord.y = 140 //да, это оплохое решение, но есть ставить такой же y, как и у танков, то эта штука отказывакется работать(
+    
+        rightWord.dx = -leftEnemyTank.speed
+        wrongWord.dx = rightEnemyTank.speed
+    } else {
+        rightEnemyTank.isRightTank = false
+        leftEnemyTank.isRightTank = true
+
+        rightWord.y = leftEnemyTank.y
+        rightWord.startx = leftEnemyTank.startx
+        wrongWord.y = rightEnemyTank.y
+        wrongWord.startx = rightEnemyTank.startx
+
+        rightWord.dx = -leftEnemyTank.speed
+        wrongWord.dx = rightEnemyTank.speed
+    }
 }
 
 //
 
 //тело
+contentSetup()
 initEventsListeners()
 play()
 
