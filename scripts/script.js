@@ -44,10 +44,14 @@ restButt.src = "./images/restartButton.png"
 //
 
 //объекты и массивы
-let content = ["правильное слово", "неправильное слово", "правильное слово", "неправильное слово", "правильное слово", "неправильное слово", "правильное слово", "неправильное слово", "правильное слово", "неправильное слово", "правильное слово", "неправильное слово"]
+let content = ["правильное слово 1", "неправильное слово 1", "правильное слово 2", "неправильное слово 2"]
+
+let score = 0
+
+const tankTextSizeAndFont = "32px Arial"
 
 let i = 0;
-i = getRandomInt(content.length - 1)
+
 
 let ground = {
     width: 1920,
@@ -158,22 +162,13 @@ let restartButton = {
 
 function initEventsListeners() {
     window.addEventListener("click", clickmouse);
-    window.addEventListener("click", restartGame)
-}
-
-function restartGame(event) {
-    if (!game.isGame){
-        if(event.clientX >= restartButton.x && event.clientX < restartButton.x + restartButton.width && event.clientY >= restartButton.y && event.clientY <= restartButton.y + restartButton.height){
-            location.reload();
-        }
-    }
 }
 
 function removeObject(obj) {
     obj.x = obj.startx;
     obj.isDead = false;
+    draw(obj)
 }
-
 
 function niceShot(obj) {
     let shotLeft1 = projectile.x < obj.x + obj.width;
@@ -192,6 +187,10 @@ function clickmouse(event) {
             projectile.dx = Math.round(((projectile.disX - projectile.x) / (((Math.abs(projectile.disX - projectile.x) ** 2) + Math.abs(projectile.disY - projectile.y) ** 2) ** (1 / 2) / projectile.height)));
             projectile.dy = Math.abs(Math.round(((projectile.disY - projectile.y) / (((Math.abs(projectile.disX - projectile.x) ** 2) + Math.abs(projectile.disY - projectile.y) ** 2) ** (1 / 2) / projectile.height ))));
         }
+    } else {
+        if(event.clientX >= restartButton.x && event.clientX < restartButton.x + restartButton.width && event.clientY >= restartButton.y && event.clientY <= restartButton.y + restartButton.height){
+            location.reload();
+        }
     }
 }
 
@@ -203,55 +202,95 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
-function update(){
-    if (projectile.y<0) {
-        game.isGame = false
-        drawLose()
+function rightEnemyTankNiceShotCheck(){
+    if (rightEnemyTank.isDead === true) {
+        if(rightEnemyTank.isRightTank === false){
+            score -= 1
+        } else {
+            score += 1
+        }
+        contentSetup()
+        wrongWord.x = wrongWord.startx
+        rightWord.x = rightWord.startx
+        removeObject(rightEnemyTank);
+        removeObject(leftEnemyTank);
+        removeObject(projectile)
     }
+}
+
+function leftEnemyTankNiceShotCheck(){
+    if (leftEnemyTank.isDead === true) {
+        if(leftEnemyTank.isRightTank === false){
+            score -=1
+        } else {
+            score +=1 
+        }
+        contentSetup()
+        wrongWord.x = wrongWord.startx
+        rightWord.x = rightWord.startx
+        removeObject(leftEnemyTank);
+        removeObject(rightEnemyTank);
+        removeObject(projectile)
+    }
+}
+
+function updateObjects(){
     projectile.x += projectile.dx;
     projectile.y -= projectile.dy;
     leftEnemyTank.x -= leftEnemyTank.speed
     rightEnemyTank.x += rightEnemyTank.speed
     rightWord.x += rightWord.dx
     wrongWord.x += wrongWord.dx
+}
+
+function isProjectileAbord(){
+    if (projectile.x + projectile.dx > game.width|| projectile.x + projectile.dx < 0 || projectile.y<100) {
+        projectile.x = projectile.startx;
+        projectile.y = projectile.starty;
+        projectile.dx = 0;
+        projectile.dy = 0;
+        draw(projectile);
+    }
+}
+
+function update(){
+    isProjectileAbord()
+    updateObjects()
     niceShot(rightEnemyTank);
-    if (rightEnemyTank.isDead === true) {
-        if(rightEnemyTank.isRightTank === false){
-            game.isPlayerWon = false
-        } else {
-            game.isPlayerWon = true
-        }
-        game.isGame = false
-        removeObject(rightEnemyTank);
-    }
+    rightEnemyTankNiceShotCheck()
     niceShot(leftEnemyTank)
-    if (leftEnemyTank.isDead === true) {
-        if(leftEnemyTank.isRightTank === false){
-            game.isPlayerWon = false
-        } else {
-            game.isPlayerWon = true
-        }
-        game.isGame = false
-        removeObject(leftEnemyTank);
-    }
+    leftEnemyTankNiceShotCheck()
     isTankIsAbordBorder()
+}
+
+function drawContent(){
+    canvasContext.font = tankTextSizeAndFont;// глобальным это сделать нельзя, по этому оно тут
+    canvasContext.fillText(content[i+1], rightWord.x, rightWord.y);
+    canvasContext.fillText(content[i], wrongWord.x, wrongWord.y);
 }
 
 function drawFrame() {
     canvasContext.clearRect(0, 0, ground.width, ground.height);
     draw(ground)
+    drawContent()
     draw(rightEnemyTank)
     draw(leftEnemyTank)
     draw(frieldlyTank)
     draw(projectile)
-    canvasContext.font = " 32px Arial";// глобальным это сделать нельзя, по этому оно тут
-    canvasContext.fillText(content[i+1], rightWord.x, rightWord.y);
-    canvasContext.fillText(content[i], wrongWord.x, wrongWord.y);
+    drawScore()
 }
 
+
+
 function isTankIsAbordBorder(){
-    if(leftEnemyTank.x < 20){
-        game.isGame = false
+    if(leftEnemyTank.x < 20 || rightEnemyTank.x > 1800){
+        score -= 1
+        rightEnemyTank.x = rightEnemyTank.startx
+        leftEnemyTank.x = leftEnemyTank.startx
+        rightWord.x = rightWord.startx
+        wrongWord.x = wrongWord.startx
+        draw(rightEnemyTank)
+        draw(leftEnemyTank)
     }
 }
 
@@ -265,21 +304,29 @@ function drawWin(){
     draw(restartButton)
 }
 
+function drawScore(){
+    canvasContext.fillText("Score: ", 50, 50);
+    canvasContext.fillText(score, 150, 50);
+}
+
 function play(){
+    drawFrame()
+    update()
     if(game.isGame === true){
-        drawFrame()
-        update()
-    } else {
-        if(!game.isPlayerWon){
-            drawLose()
-        } else {
-            drawWin()
-        }
+        requestAnimationFrame(play)
     }
-    requestAnimationFrame(play)
+    if(score === -5){
+        drawLose()
+        game.isGame = false
+    }
+    if(score === 15){
+        drawWin()
+        game.isGame = false
+    }
 }
 
 function contentSetup() {
+    i = getRandomInt(content.length - 1)
     if (i % 2 === 0){
         rightEnemyTank.isRightTank = true
         leftEnemyTank.isRightTank = false
@@ -302,13 +349,13 @@ function contentSetup() {
 
         rightWord.dx = -leftEnemyTank.speed
         wrongWord.dx = rightEnemyTank.speed
+
     }
 }
 
 //
 
 //тело
-contentSetup()
 initEventsListeners()
 play()
 
