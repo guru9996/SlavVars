@@ -63,7 +63,7 @@ let content = [ // так лучше
 
 let textFont = "#FFFFFF"
 
-let countRepeatsOfGame = 14;
+let countRepeatsOfGame = 0;
 
 let score = 0
 
