@@ -37,9 +37,6 @@ tank.onload = function () {
     canvasContext.drawImage(tank, frieldlyTank.x, frieldlyTank.y);
 }
 
-let lostScr = new Image()
-lostScr.src = "./images/lostScreen.png"
-
 let endGameScreen = new Image()
 endGameScreen.src = "./images/endGameScr.png"
 
@@ -66,15 +63,12 @@ let content = [ // так лучше
 
 let textFont = "#FFFFFF"
 
-let countRepeatsOfGame = 0;
+let countRepeatsOfGame = 14;
 
 let score = 0
 
 let rightIndex = 0
 let wrongIndex = 0
-
-let winScore = 15
-let loseScore = -5
 
 let rightTankIndex = 1
 let leftTankIndex = 0
@@ -85,6 +79,8 @@ let leftBorder = 1800
 let currIndex = 0
 
 const textSizeAndFont = "bold 24px ProtoSans56"
+
+const textSizeAndFontForEnGameScreen = "bold 72px ProtoSans56"
 
 const textSizeAndFontForScore = "bold 32px ProtoSans56"
 
@@ -108,21 +104,12 @@ let endGameScr = {
     model: endGameScreen,
 }
 
-let rightEnemyTank = {
-    width: 149,
-    startx: 270,
-    x: 270,
-    y: 145,
-    speed: 6.235,//13.55
-    model: enemyTank1,
-    isDead: false,
-    isRightTank: false,
-}
-
 let tanks = [
     {
-        width: 149,
+        width: 141,
+        height: 141,
         startx: 270,
+        starty: 205,
         x: 270,
         y: 205,
         speed: 4.235,//13.55
@@ -131,8 +118,10 @@ let tanks = [
         isRightTank: false,
     },
     {
-        width: 149,
+        width: 141,
+        height: 141,
         startx: 1400,
+        starty: 370,
         x: 1400,
         y: 370,
         speed: -4,//13
@@ -142,20 +131,11 @@ let tanks = [
     }
 ]
 
-let leftEnemyTank = {
-    width: 149,
-    startx: 1400,
-    x: 1400,
-    y: 265,
-    speed: 4,//13
-    model: enemyTank2,
-    isDead: false,
-    isRightTank: false,
-}
-
 let frieldlyTank = {
     model: tank,
-    x: 867,
+    width: 134, 
+    height: 158,
+    x: 868,
     y: 830,
     angle: 34,
 }
@@ -221,16 +201,20 @@ function initEventsListeners() {
 }
 
 function removeObject(obj) {
+    obj.dx = 0
+    obj.dy = 0
     obj.x = obj.startx;
+    obj.y = obj.starty
     obj.isDead = false;
     draw(obj)
 }
 
 function niceShot(obj) {
-    let shotLeft1 = projectile.x < obj.x + obj.width;
-    let shotLeft = projectile.x > obj.x;
-    let shotTop = projectile.y < obj.y;
-    if (shotLeft && shotLeft1 && shotTop) {
+    let shotRight = projectile.x < obj.x + obj.width;
+    let shotLeft = projectile.x + projectile.width > obj.x; 
+    let shotTop = projectile.y > obj.y;
+    let shotDown = projectile.y < obj.y + obj.height; 
+    if (shotLeft && shotRight && shotTop && shotDown){
         obj.isDead = true
     }
 }
@@ -254,7 +238,7 @@ function clickmouse(event) {
 }
 
 function draw(obj) {
-    canvasContext.drawImage(obj.model, obj.x, obj.y);
+    canvasContext.drawImage(obj.model, obj.x, obj.y, obj.width, obj.height);
 }
 
 function getRandomInt(max) {
@@ -295,12 +279,12 @@ function isProjectileAbord() {
         projectile.y = projectile.starty;
         projectile.dx = 0;
         projectile.dy = 0;
-        draw(projectile);
     }
 }
 
 function update() {
     isProjectileAbord()
+    draw(projectile);
     updateObjects()
     niceShot(tanks[rightIndex]);
     tankShotCheck(tanks[rightIndex])
@@ -338,21 +322,22 @@ function isTankIsAbordBorder() {
     }
 }
 
-function drawLose() {
-    draw(lostScreen)
-    draw(restartButton)
-}
 
 function drawendGame() {
     draw(endGameScr)
     draw(restartButton)
+    canvasContext.fillStyle = textFont;
+    canvasContext.font = textSizeAndFontForEnGameScreen ;
+    canvasContext.fillText("Score: ", 800, 620);
+    canvasContext.fillText(score, 800, 700);
+    canvasContext.fillText("/  15", 915, 700);
 }
 
 function drawScore() {
     canvasContext.fillStyle = textFont;
     canvasContext.font = textSizeAndFontForScore;
     canvasContext.fillText("Score: ", 860, 50);
-    canvasContext.fillText(score, 860, 130);
+    canvasContext.fillText(score, 870, 130);
     canvasContext.fillText("/ 15", 915, 130);
 }
 
