@@ -1,52 +1,6 @@
 let canvas = document.getElementById('canvas');
 let canvasContext = canvas.getContext('2d');
 
-//подгрузка фото
-
-let font = new FontFace('ProtoSans56', 'url(font/font.ttf)');
-
-font.load().then(function(font) {
-    console.log('font ready');
-    document.fonts.add(font);
-});
-
-let background = new Image();
-background.src = "./images/background.png";
-
-background.onload = function () {
-    canvas.width = game.width;
-    canvas.height = game.height;
-    canvasContext.drawImage(background, 0, 0);
-}
-
-let enemyTank1 = new Image();
-enemyTank1.src = "./images/enemyTank1.png";
-enemyTank1.onload = function () {
-    canvasContext.drawImage(enemyTank1, rightEnemyTank.x, rightEnemyTank.y);
-}
-
-let enemyTank2 = new Image();
-enemyTank2.src = "./images/enemyTank2.png";
-enemyTank2.onload = function () {
-    canvasContext.drawImage(enemyTank2, leftEnemyTank.x, leftEnemyTank.y);
-}
-
-let tank = new Image();
-tank.src = "./images/tank.png";
-tank.onload = function () {
-    canvasContext.drawImage(tank, frieldlyTank.x, frieldlyTank.y);
-}
-
-let endGameScreen = new Image()
-endGameScreen.src = "./images/endGameScr.png"
-
-let projectileModel = new Image()
-projectileModel.src = "./images/pula.png"
-
-let restButt = new Image()
-restButt.src = "./images/restartButton.png"
-//
-
 //объекты и массивы
 // так было раньше
 
@@ -61,9 +15,14 @@ let content = [ // так лучше
     }
 ]
 
+let contentSize = {
+    width: 200,
+    height: 30,
+}
+
 let textFont = "#FFFFFF"
 
-let countRepeatsOfGame = 0;
+let countRepeatsOfGame = 14;
 
 let score = 0
 
@@ -80,7 +39,7 @@ let currIndex = 0
 
 const textSizeAndFont = "bold 24px ProtoSans56"
 
-const textSizeAndFontForEnGameScreen = "bold 72px ProtoSans56"
+const textSizeAndFontForEnGameScreen = "72px ProtoSans56"
 
 const textSizeAndFontForScore = "bold 32px ProtoSans56"
 
@@ -92,7 +51,7 @@ let ground = {
     height: 1080,
     x: 0,
     y: 0,
-    model: background,
+    model: null,
 }
 
 
@@ -101,7 +60,7 @@ let endGameScr = {
     height: 1080,
     x: 0,
     y: 0,
-    model: endGameScreen,
+    model: null,
 }
 
 let tanks = [
@@ -112,8 +71,9 @@ let tanks = [
         starty: 205,
         x: 270,
         y: 205,
-        speed: 4.235,//13.55
-        model: enemyTank1,
+        buffer: 15,
+        speed: 3.235,//13.55
+        model: null,
         isDead: false,
         isRightTank: false,
     },
@@ -124,15 +84,16 @@ let tanks = [
         starty: 370,
         x: 1400,
         y: 370,
-        speed: -4,//13
-        model: enemyTank2,
+        buffer: 15,
+        speed: -3,//13
+        model: null,
         isDead: false,
         isRightTank: false,
     }
 ]
 
 let frieldlyTank = {
-    model: tank,
+    model: null,
     width: 134, 
     height: 158,
     x: 868,
@@ -176,7 +137,7 @@ let projectile = {
     y: 760,
     startx: 906,
     starty: 740,
-    model: projectileModel,
+    model: null,
     dx: 0,
     dy: 0,
     disX: 0,
@@ -189,10 +150,82 @@ let restartButton = {
     width: 397,
     x: 750,
     y: 790,
-    model: restButt,
+    model: null,
+}
+
+let gameScore = {
+    maxScoreX: 915,
+    maxScoreY: 130,
+    scoreX: 870,
+    scoreY: 130,
+    scoreWordX: 860,
+    scoreWordY: 50,
+}
+
+let endGameScore = {
+    maxScoreX: 915,
+    maxScoreY: 700,
+    scoreX: 800,
+    scoreY: 700,
+    scoreWordX: 800,
+    scoreWordY: 610,
 }
 
 //
+
+//подгрузка фото
+
+let font = new FontFace('ProtoSans56', 'url(font/font.ttf)');
+
+font.load().then(function(font) {
+    console.log('font ready');
+    document.fonts.add(font);
+});
+
+let background = new Image();
+background.src = "./images/background.png";
+ground.model = background
+
+background.onload = function () {
+    canvas.width = game.width;
+    canvas.height = game.height;
+    canvasContext.drawImage(background, 0, 0);
+}
+
+let enemyTank1 = new Image();
+enemyTank1.src = "./images/enemyTank1.png";
+tanks[0].model = enemyTank1
+enemyTank1.onload = function () {
+    canvasContext.drawImage(enemyTank1, tanks[0].x, tanks[0].y);
+}
+
+let enemyTank2 = new Image();
+enemyTank2.src = "./images/enemyTank2.png";
+tanks[1].model = enemyTank2
+enemyTank2.onload = function () {
+    canvasContext.drawImage(enemyTank2, tanks[1].x, tanks[1].y);
+}
+
+let tank = new Image();
+tank.src = "./images/tank.png";
+frieldlyTank.model = tank
+tank.onload = function () {
+    canvasContext.drawImage(tank, frieldlyTank.x, frieldlyTank.y);
+}
+
+let endGameScreen = new Image()
+endGameScreen.src = "./images/endGameScr.png"
+endGameScr.model = endGameScreen
+
+let projectileModel = new Image()
+projectileModel.src = "./images/pula.png"
+projectile.model = projectileModel
+
+let restButt = new Image()
+restButt.src = "./images/restartButton.png"
+restartButton.model = restButt
+//
+
 
 //функции
 
@@ -215,6 +248,7 @@ function niceShot(obj) {
     let shotTop = projectile.y > obj.y;
     let shotDown = projectile.y < obj.y + obj.height; 
     if (shotLeft && shotRight && shotTop && shotDown){
+        
         obj.isDead = true
     }
 }
@@ -297,8 +331,8 @@ function drawContent() {
     canvasContext.fillStyle = textFont;
     canvasContext.font = textSizeAndFont;
     canvasContext.align = "center"
-    canvasContext.fillText(content[currIndex].rightWord, tanks[rightIndex].x -15, tanks[rightIndex].y -15, 200, 30);
-    canvasContext.fillText(content[currIndex].wrongWord, tanks[wrongIndex].x -20, tanks[wrongIndex].y -15, 200, 30);
+    canvasContext.fillText(content[currIndex].rightWord, tanks[rightIndex].x - tanks[rightIndex].buffer, tanks[rightIndex].y - tanks[rightIndex].buffer, contentSize.width, contentSize.height);
+    canvasContext.fillText(content[currIndex].wrongWord, tanks[wrongIndex].x - tanks[rightIndex].buffer, tanks[wrongIndex].y - tanks[rightIndex].buffer, contentSize.width, contentSize.height);
 }
 
 function drawFrame() {
@@ -323,22 +357,22 @@ function isTankIsAbordBorder() {
 }
 
 
-function drawendGame() {
+function drawEndGame() {
     draw(endGameScr)
     draw(restartButton)
     canvasContext.fillStyle = textFont;
     canvasContext.font = textSizeAndFontForEnGameScreen ;
-    canvasContext.fillText("Score: ", 800, 620);
-    canvasContext.fillText(score, 800, 700);
-    canvasContext.fillText("/  15", 915, 700);
+    canvasContext.fillText("Score: ", endGameScore.scoreWordX, endGameScore.scoreWordY);
+    canvasContext.fillText(score, endGameScore.scoreX, endGameScore.scoreY);
+    canvasContext.fillText("/  15", endGameScore.maxScoreX, endGameScore.maxScoreY);
 }
 
 function drawScore() {
     canvasContext.fillStyle = textFont;
     canvasContext.font = textSizeAndFontForScore;
-    canvasContext.fillText("Score: ", 860, 50);
-    canvasContext.fillText(score, 870, 130);
-    canvasContext.fillText("/ 15", 915, 130);
+    canvasContext.fillText("Score: ", gameScore.scoreWordX, gameScore.scoreWordY);
+    canvasContext.fillText(score, gameScore.scoreX, gameScore.scoreY);
+    canvasContext.fillText("/ 15", gameScore.maxScoreX, gameScore.maxScoreY);
 }
 
 
@@ -349,7 +383,7 @@ function play() {
         requestAnimationFrame(play)
     }
     if (countRepeatsOfGame === 15) {
-        drawendGame()
+        drawEndGame()
         game.isGame = false
     }
 }
