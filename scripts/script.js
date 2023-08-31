@@ -182,6 +182,9 @@ font.load().then(function(font) {
     document.fonts.add(font);
 });
 
+let explosionSprite1 = new Image()
+explosionSprite1.src = "./images/explosionFrame1.png"
+
 let background = new Image();
 background.src = "./images/background.png";
 ground.model = background
@@ -242,13 +245,18 @@ function removeObject(obj) {
     draw(obj)
 }
 
+function explosionAnimation(obj){
+    canvasContext.drawImage(explosionSprite1, obj.x + obj.buffer, obj.y + obj.buffer)
+}
+
 function niceShot(obj) {
     let shotRight = projectile.x < obj.x + obj.width;
     let shotLeft = projectile.x + projectile.width > obj.x; 
     let shotTop = projectile.y > obj.y;
     let shotDown = projectile.y < obj.y + obj.height; 
     if (shotLeft && shotRight && shotTop && shotDown){
-        
+        explosionAnimation(obj)
+        setTimeout(3000)
         obj.isDead = true
     }
 }
