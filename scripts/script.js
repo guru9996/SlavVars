@@ -35,7 +35,7 @@ let rightTankIndex = 1
 let leftTankIndex = 0
 
 let rightBorder = 20
-let leftBorder = 1800
+let leftBorder = 1760
 
 let currIndex = 0
 
@@ -179,6 +179,7 @@ let endGameScore = {
 }
 
 let explodesFrames = {
+    isSpriteOnGoing: false,
     model: undefined,
     start: false,
     frameSizeX: 64,
@@ -278,8 +279,8 @@ function removeObject(obj) {
     obj.dy = 0
     obj.x = obj.startx;
     obj.y = obj.starty
-    obj.isDead = false;
     draw(obj)
+    obj.isDead = false;
 }
 
 function explosionAnimation(obj) {
@@ -312,7 +313,8 @@ function niceShot(obj) {
         explodesFrames.x = obj.x
         explodesFrames.y = obj.y
         changeTankModel()
-        explodesFrames.canDraw = true;    
+        explodesFrames.canDraw = true;   
+        explodesFrames.isSpriteOnGoing = true; 
         setTimeout(() => {
             obj.isDead = true
             returnModel()
@@ -331,6 +333,7 @@ function drawSprites(obj) {
                 if (obj.selectedSprite > obj.count - 1){
                     clearInterval(obj.spritesInterval)
                     obj.canDraw = false;
+                    explodesFrames.isSpriteOnGoing = false; 
                     obj.selectedSprite = 0 
                 }
             }, obj.spriteDuration);
@@ -455,15 +458,20 @@ function drawFrame() {
 }
 
 function isTankIsAbordBorder() {
-    if (tanks[1].x < rightBorder || tanks[0].x > leftBorder + 30) {
-        tanks[0].x = tanks[0].startx
-        tanks[1].x = tanks[1].startx
-        rightWord.x = rightWord.startx
-        wrongWord.x = wrongWord.startx
-        tanks[0].canTankMove = true
-        tanks[1].canTankMove = true
-        projectile.isShooted = false
-        countRepeatsOfGame++
+    if (tanks[1].x < rightBorder || tanks[0].x > leftBorder) {
+        if(!explodesFrames.isSpriteOnGoing){
+            tanks[0].x = tanks[0].startx
+            tanks[1].x = tanks[1].startx
+            rightWord.x = rightWord.startx
+            wrongWord.x = wrongWord.startx
+            tanks[0].canTankMove = true
+            tanks[1].canTankMove = true
+            projectile.isShooted = false
+            countRepeatsOfGame++
+        } else {
+            tanks[0].canTankMove = false
+            tanks[1].canTankMove = false
+        }
     }
 }
 
