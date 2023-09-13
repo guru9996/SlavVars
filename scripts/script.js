@@ -416,6 +416,9 @@ function isProjectileAbord() {
         projectile.y = projectile.starty;
         projectile.dx = 0;
         projectile.dy = 0;
+        if(!tanks[wrongIndex].isTankShooted || !tanks[rightIndex].isTankShooted){
+            projectile.isShooted = false
+        }
     }
 }
 
@@ -499,6 +502,7 @@ function play() {
     drawFrame()
     update()
     if (game.isGame === true) {
+        console.log(countRepeatsOfGame)
         requestAnimationFrame(play)
     }
     if (countRepeatsOfGame === 15) {
